@@ -1,0 +1,3 @@
+---
+# vars file for ecr_setup
+aws_account_id: "149536480317"

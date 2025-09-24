@@ -1,0 +1,6 @@
+---
+# vars file for Common
+package_names:
+  - pk_name: docker
+  - pk_name: nginx
+  - pk_name: git

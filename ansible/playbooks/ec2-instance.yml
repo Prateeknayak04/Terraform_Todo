@@ -1,0 +1,24 @@
+- name: Provision of ec2 instances using Ansible
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - ecr_setup
+
+- name: Configuration of Ec2_instance
+  hosts: lunched_ec2_instances
+  gather_facts: yes
+  roles:
+    - Common
+    - Docker
+    
+- name: Configuration of monitoring service on ec2 instance
+  hosts: monitoring_ec2_instances
+  gather_facts: yes
+  roles:
+    - monitoring
+
+
+
+
+
+

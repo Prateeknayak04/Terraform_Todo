@@ -1,0 +1,83 @@
+---
+# tasks file for Docker
+
+- name: Start and enable Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Create Docker group
+  group: 
+    name: docker
+    state: present
+
+- name: Add user to Docker group
+  user: 
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+  become: yes
+
+- name: Get ECR login token
+  shell: |
+    aws ecr get-login-password --region {{ aws_region }} 
+  register: ecr_token
+
+- name: Debug the ECR Token
+  debug: 
+    var: ecr_token
+
+- name: Login into ECR registry
+  community.docker.docker_login:
+    registry_url: "{{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com"
+    username: AWS
+    password: "{{ ecr_token.stdout }}"
+    reauthorize: yes
+  register: docker_login_result
+  become: yes
+
+- name: Debug ECR Token
+  debug: 
+    var: docker_login_result
+
+- name: Pull the latest Backend image from ecr
+  docker_image:
+    name: "{{ backend_ecr_uri }}:latest"
+    source: pull
+    force_source: yes
+  become: yes
+
+- name: Get SSM Parameter
+  shell: |
+    aws ssm get-parameter \
+    --name "/{{ env_var }}/backend/secret_uri" \
+    --with-decryption \
+    --query "Parameter.Value" \
+    --output text \
+    --region {{ aws_region }}
+  register: SECRET_URI
+
+
+- name: Create .env file from SSM parameters
+  copy: 
+    content: |
+      secret={{ SECRET_URI.stdout }}
+      PORT=5000
+    dest: /opt/todo-app/.env
+    mode: "0600"
+  become: yes
+
+- name: Start the backend container
+  become: yes
+  docker_container:
+    name: backend
+    image: "{{ backend_ecr_uri }}:latest"
+    state: started
+    restart_policy: always
+    ports: 
+      - "5000:5000"
+    volumes:
+      - /var/log/todo-app:/var/log/todo-app
+    env_file: /opt/todo-app/.env

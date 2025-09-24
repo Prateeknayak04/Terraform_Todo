@@ -1,0 +1,4 @@
+---
+# defaults file for monitoring
+grafana_admin_password: "admin"
+monitoring_dir: "/opt/monitoring"

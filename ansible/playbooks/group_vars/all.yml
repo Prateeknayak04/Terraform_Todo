@@ -1,0 +1,6 @@
+---
+aws_region: ap-south-1
+aws_account_id: "149536480317"
+docker_image_tag: "latest"
+batch_size: 1 # this is for the deployment manage
+max_fail_percentage: 0

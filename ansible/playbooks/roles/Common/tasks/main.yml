@@ -1,0 +1,57 @@
+---
+# tasks file for Common
+- name: Install the common Packages 
+  become: yes
+  package:
+    name: "{{ item.pk_name}}"
+    state: present
+  with_items: "{{ package_names }}"
+  
+
+- name: install pip 
+  become: yes
+  package:
+    name: python3-pip
+    state: present
+
+- name: copy source code 
+  become: yes
+  synchronize:
+    src: "{{ playbook_dir }}/../../"
+    dest: "/opt/todo-app"
+    delete: yes
+    recursive: yes
+    rsync_opts: 
+      - "--exclude=.git"
+      - "--exclude=.github"
+      - "--exclude=ansible"
+      - "--exclude=.venv"
+      - "--exclude=.env"
+      - "--exclude=.gitignore"
+      - "--exclude=.python-version"
+      - "--exclude=pyproject.toml"
+      - "--exclude=README.md"
+      - "--exclude=terraform"
+      - "--exclude=website/statics"
+      - "--exclude=website/templates"
+      - "--exclude=website/__pycache__"
+      - "--exclude=uv.lock"
+      - "--exclude=.dockerignore"
+      - "--chmod=0600"
+
+
+# - name: Set secret key as environment variable
+#   set_fact:
+#     secret_key: "{{ lookup('env', 'SECRET') }}"
+
+# - name: Create .env file in remote instance
+#   become: yes
+#   copy:
+#     dest: /opt/todo-app/.env
+#     content: |
+#       SECRET_KEY={{ secret_key }}
+#     owner: "{{ ansible_user }}"
+#     group: ec2-user
+#     mode: '0644'
+
+
