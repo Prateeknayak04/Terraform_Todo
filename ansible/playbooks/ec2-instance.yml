@@ -11,7 +11,7 @@
     - Common
     - Docker
     
-- name: Configuration of monitoring service on ec2 instance
+- name: Configuration of monitoring service
   hosts: monitoring_ec2_instances
   gather_facts: yes
   roles:
